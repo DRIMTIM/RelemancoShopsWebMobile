@@ -1,0 +1,30 @@
+<ion-view id="login" view-title="Login">
+  <ion-header-bar  class="bar bar-header bar-dark">
+    <h1 class="title">RelemancoShopWeb</h1>
+  </ion-header-bar>
+  <ion-content>
+    <div class="row">
+      <div class="col-offset-30 col-50 col-offset-25 rmw-logo">
+        <img src="img/imgWorkman.png" alt=""/>
+      </div>
+    </div>
+    <div class="list">
+      <label class="item item-input">
+        <input type="text" placeholder="Nombre de Usuario" ng-model="user.nombre"/>
+      </label>
+      <label class="item item-input">
+        <input type="password" placeholder="Contraseña" ng-model="user.password"/>
+      </label>
+    </div>
+    <div clas="row">
+      <div class="col-offset-25 col-50 col-offset-25" style="margin-top: 5%;">
+        <button class="button button-block button-dark" ng-click="doLogin()">
+          Login
+        </button>
+      </div>
+    </div>
+    </div>
+  </ion-content>
+  <ion-footer-bar class="bar bar-footer bar-dark rmw-footer-large"">
+  </ion-footer-bar>
+</ion-view>
