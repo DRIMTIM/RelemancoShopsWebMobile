@@ -44,7 +44,18 @@ angular.module('app', ['ionic', 'app.controllers', 'app.services', 'uiGmapgoogle
                         templateUrl: 'templates/home.html',
                         controller: 'HomeController'
                     }
+                },
+                onEnter: function(listaComercios, relevadorService) {
+                    relevadorService.getComercios()
+                        .then(function success(response){
+                            listaComercios.setListaComercios(response.listaComercios)
+                        },
+                        function error(response) {
+                            listaComercios.setListaComercios([]);
+                        }
+                    )
                 }
+
             })
             .state('app.mapa', {
                 url: '/mapa',
@@ -69,10 +80,17 @@ angular.module('app', ['ionic', 'app.controllers', 'app.services', 'uiGmapgoogle
                 views: {
                     'menuContent': {
                         templateUrl: 'templates/stock.html',
-                        controller: 'StockPedidosController'
+                        controller: 'StockController'
                     }
                 }
             });
 
         $urlRouterProvider.otherwise('/login');
+    })
+
+
+    .run(function ($rootScope) {
+
+        $rootScope.BACKEND_ENDPOINT = "http://demo2039282.mockable.io/";
+
     });

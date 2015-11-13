@@ -1,5 +1,30 @@
-<ion-view view-title="PEdi">
+<ion-view view-title="Nuevo Pedido">
     <ion-content>
-        YO
+        <div class="list card">
+            <div class="item item-divider">
+                <a class="text-right">Comercio</a>
+            </div>
+            <a class="item">
+                <select ng-options="com as com.nombre for com in listaComercios" ng-model="$scope.comercio" ng-change="printP()">
+
+                </select>
+                Selected Comercio = {{comercio.nombre}}
+            </a>
+            <div class="item item-divider">
+                <a class="text-right">Productos</a>
+            </div>
+            <a class="item" ng-repeat="producto in listaProductos track by producto.id">
+                <label class="item item-avatar">
+                    <img src="img/404Prod.jpg" alt=""/>
+                    <h2 class="positive">{{producto.nombre}}</h2>
+                    <div class="item item-input-inset" style="border: none;">
+                        <label class="input-label"><b>Cantidad</b></label>
+                        <label class="item-input-wrapper">
+                            <input type="number" min="0" placeholder="0" class="pull-right">
+                        </label>
+                    </div>
+                </label>
+            </a>
+        </div>
     </ion-content>
 </ion-view>
