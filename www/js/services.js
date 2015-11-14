@@ -66,6 +66,23 @@ function($q, $rootScope, $http){
         return defer.promise;
     }
 
+    this.tomarPedidoProductos = function(request) {
+
+        var defer = $q.defer();
+        var url = $rootScope.BACKEND_ENDPOINT + 'tomarPedido';
+
+        $http.post(url, request)
+            .then(
+            function success(response){
+                defer.resolve(response.data)
+            },
+            function error(response) {
+                defer.reject(response.data);
+            }
+        );
+        return defer.promise;
+    }
+
 })
 
     .factory('$localstorage', ['$window', function($window) {

@@ -65,17 +65,52 @@ angular.module('app.controllers', [])
 
     })
 
-    .controller('PedidosController', function ($scope, comercioObject, relevadorService, $ionicPopup, $ionicLoading, listaComercios) {
+    .controller('PedidosController', function ($scope, comercioObject, relevadorService, $ionicPopup, $ionicLoading, listaComercios, $state) {
         $scope.comercio = { };
-        $scope.printP = function() {
-            console.log($scope.comercio);
+        $scope.updateComercio = function(comercio) {
+            $scope.comercio = comercio;
+        }
+        $scope.tomarPedido = function() {
+
+            var request =  {};
+            request.listaProductos = [];
+            request.idComercio = $scope.comercio.id;
+
+            $scope.listaProductos.forEach(function(value) {
+                if(value.cantidad && value.cantidad > 0) {
+                    request.listaProductos.push(value);
+                }
+            });
+
+            if(request.listaProductos.length > 0) {
+                relevadorService.tomarPedidoProductos(request)
+                    .then(function success(response){
+                        $ionicPopup.alert({
+                            title: 'Operacion exitosa',
+                            template: 'Se ha tomado el pedido correctamente.'
+                        }).then(function(){
+                            $state.go('app.mapa');
+                        });
+
+                    },
+                    function error(response) {
+                        $ionicPopup.alert({
+                            title: 'Error',
+                            template: response.message? response.message : 'Ocurrio un error'
+                        });
+                    }
+                );
+            }
+            else {
+                $ionicPopup.alert({
+                    title: 'Error',
+                    template: 'Debes actualizar por lo menos una cantidad.'
+                });
+            }
         }
         //Si cambia el valor comercio, busca los productos.
         $scope.$watch('comercio', function(newValue, oldvalue) {
-            console.log('ENTRO AL WATCH');
             if(newValue && newValue.id) {
-                console.log('cambio Valor');
-                console.log(newValue);
                 $ionicLoading.show({
                     template: 'Cargando...'
                 });

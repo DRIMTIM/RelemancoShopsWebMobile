@@ -1,3 +1,12 @@
+
+
+.rmw-input-select {
+    width:70%;
+    font-size:1rem;
+    text-indent:20px;
+    padding:.5rem 0;
+}
+
 .rmw-footer-large {
     height: 10%;
 }
