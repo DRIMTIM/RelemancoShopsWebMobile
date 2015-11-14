@@ -1,7 +1,8 @@
 <ion-view view-title="Rutas">
     <ion-content class="padding">
-        <div class="rmw-map-container-rutas">
-            <ui-gmap-google-map center='map.center' zoom='map.zoom'></ui-gmap-google-map>
+        <div class="rmw-map-container-rutas" data-tap-disabled="true">
+            <ui-gmap-google-map center='map.center' zoom='map.zoom' id="googleMap" control="map.control">
+            </ui-gmap-google-map>
         </div>
         <div class="row">
             <div class="col-offset-5 col-90">

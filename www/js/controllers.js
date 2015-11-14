@@ -28,8 +28,9 @@ angular.module('app.controllers', [])
 
     .controller('RutasController',
 
-    function ($scope, $ionicLoading, geoLocationService, $localstorage) {
-        $scope.map = {center: {latitude: 45, longitude: -73}, zoom: 13};
+    function ($scope, $ionicLoading, geoLocationService, $localstorage, listaComercios, uiGmapIsReady) {
+        $scope.map = {center: {latitude: 45, longitude: -73}, zoom: 13, control: {}};
+        $scope.comerciosMarkers = listaComercios.getAllMarkers();
         $ionicLoading.show({
             template: 'Cargando...'
         });
@@ -41,6 +42,11 @@ angular.module('app.controllers', [])
             ruta.isInit = true;
             $localstorage.setObject('ruta', ruta);
         }
+        uiGmapIsReady.promise(1).then(function(){
+            geoLocationService.createRoutes($scope.comerciosMarkers, $scope.map);
+        });
+
+
     })
 
     .controller('StockController', function ($scope, comercioObject, relevadorService, $ionicPopup) {
