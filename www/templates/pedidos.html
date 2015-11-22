@@ -16,23 +16,22 @@
                 <div class="item item-divider">
                     <a class="text-right">Productos</a>
                 </div>
-                <a class="item" ng-repeat="producto in listaProductos track by producto.id">
-                    <label class="item item-avatar">
-                        <img src="img/404Prod.jpg" alt=""/>
-
+                <div class="item" ng-repeat="producto in listaProductos track by producto.id">
+                    <div class="item item-avatar">
+                        <img src="img/404Prod.jpg"/>
                         <h2 class="positive">{{producto.nombre}}</h2>
+                    </div>
+                    <div class="item item-input-inset" style="border: none;">
+                        <label class="input-label"><b>Cantidad</b></label>
+                        <label class="item-input-wrapper">
+                            <input type="number" min="0" placeholder="0" class="pull-right"
+                                   ng-model="producto.cantidad">
+                        </label>
+                    </div>
 
-                        <div class="item item-input-inset" style="border: none;">
-                            <label class="input-label"><b>Cantidad</b></label>
-                            <label class="item-input-wrapper">
-                                <input type="number" min="0" placeholder="0" class="pull-right"
-                                       ng-model="producto.cantidad">
-                            </label>
-                        </div>
-                    </label>
-                </a>
-                <div class="text-center">
-                    <button type="submit" class="button button-dark button-block">Tomar Pedido</button>
+                </div>
+                <div class="item text-center">
+                    <button type="submit" class="button button-positive">Tomar Pedido</button>
                 </div>
             </div>
         </form>

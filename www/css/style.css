@@ -1,4 +1,22 @@
 
+.chart {
+    min-height: 20px;
+    padding: 19px;
+    margin-bottom: 20px;
+    background-color: #f5f5f5;
+    border: 1px solid #e3e3e3;
+    border-radius: 4px;
+    -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .05);
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, .05);
+}
+
+.rmw-input-stock {
+    margin-left: 4%;
+}
+
+.rmw-range {
+    width: 100%;
+}
 
 .rmw-input-select {
     width:70%;
@@ -30,4 +48,18 @@
 .rmw-map-container-rutas {
     height: 90vh;
     position: relative;
+}
+
+.item.ng-enter {
+    -webkit-animation: fadeInRight 1s;
+    animation: fadeInRight 1s;
+}
+
+.item.ng-enter-stagger {
+    -webkit-animation-delay:200ms;
+    animation-delay:200ms;
+
+    /* override to make sure it's not inherited from other styles */
+    -webkit-animation-duration:0;
+    animation-duration:0;
 }

@@ -1,7 +1,37 @@
-<ion-view view-title="STOCK">
+<ion-view view-title="Actualizar Stock">
     <ion-content>
-        <div class="list">
-
-        </div>
+        <form ng-submit="actualizarStock()">
+            <div class="list card">
+                <div class="item item-divider">
+                    <a class="text-right">Comercio</a>
+                </div>
+                <a class="item">
+                    <select class="rmw-input-select"
+                            ng-options="com as com.nombre for com in listaComercios track by com.id"
+                            ng-model="comercio"
+                            ng-change="updateListaProductos(comercio)">
+                    </select>
+                </a>
+                <div ng-repeat-start="producto in listaProductos track by producto.id" class="item item-divider">
+                    <h2 class="text-left positive">{{producto.nombre}}</h2>
+                </div>
+                <div ng-repeat-end class="item item-thumbnail-left">
+                    <img src="img/404Prod.jpg"/>
+                    <div class="range rmw-range">
+                        <i class="icon ion-ios-minus-outline"></i>
+                        <input type="range" ng-model="producto.stock" name="volume" min="0" max="{{producto.stockMaximo}}" value="{{producto.stock}}">
+                        <i class="icon ion-ios-plus-outline"></i>
+                        <div class="rmw-input-stock">
+                            <button class="button button-stable">
+                                {{producto.stock}}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="item text-center">
+                    <button type="submit" class="button button-positive">Actualizar Stock</button>
+                </div>
+            </div>
+        </form>
     </ion-content>
 </ion-view>

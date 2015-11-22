@@ -1,29 +1,40 @@
 angular.module('app.controllers', [])
 
-
-    .controller('LoginController', function ($scope, $state) {
+    .controller('LoginController', function ($scope, $state, $localstorage, $rootScope) {
         $scope.doLogin = function () {
+            $localstorage.set($rootScope.RELEVADOR, 1);
             $state.go('app.home');
         }
     })
 
     .controller('HomeController',
+    function ($scope, $ionicLoading, relevadorService, $localstorage) {
 
-    function ($scope, $ionicLoading, geoLocationService, $localstorage) {
+        //var idRelevador = $localstorage.get($rootScope.RELEVADOR);
+        var idRelevador = 1;
+        $scope.selectedComercio = {};
+        $scope.chartComercios = {
+            data: [],
+            labels: []
+        };
 
         $scope.$on('$ionicView.enter', function () {
-            // code to run each time view is entered
-            var ruta = $localstorage.get('ruta');
-            if (ruta && ruta.isInit == true) {
-                $scope.rutaInicia = true;
-                $scope.map = {center: {latitude: 45, longitude: -73}, zoom: 26};
-                $ionicLoading.show({
-                    template: 'Cargando...'
-                });
-                geoLocationService.setCurrentLocation($scope, $ionicLoading);
-            }
+            relevadorService.getProductosMasVendidosPorComercio(idRelevador).then(
+                function success(data) {
+                    if (data.length > 0) {
+                        $scope.selectedComercio = data[0];
+                        if($scope.selectedComercio.productos && $scope.selectedComercio.productos.length > 0){
+                            $scope.chartComercios.data = [];
+                            $scope.chartComercios.labels = [];
+                            $scope.selectedComercio.productos.forEach(function (val) {
+                                $scope.chartComercios.data.push(val.cantidad);
+                                $scope.chartComercios.labels.push(val.nombre);
+                            });
+                        }
+                    }
+                }
+            );
         });
-
     })
 
     .controller('RutasController',
@@ -49,24 +60,40 @@ angular.module('app.controllers', [])
 
     })
 
-    .controller('StockController', function ($scope, comercioObject, relevadorService, $ionicPopup) {
+    .controller('StockController', function ($scope, comercioObject, relevadorService, $ionicPopup, listaComercios, $ionicLoading) {
 
-        $scope.$on('$ionicView.enter', function() {
+        $scope.comercio = { };
 
-            $scope.comercio  = comercioObject.getComercio();
-            $scope.listaProductos = [];
+        $scope.actualizarStock = function() {
 
+        }
+
+        $scope.updateListaProductos = function(comercio) {
+            $ionicLoading.show({
+                template: 'Cargando...'
+            });
             relevadorService.getProductosComercio(comercio.id)
-                .then(function success(response){
-                    $scope.listaProductos = response.listaProductos;
+                .then(function success(data){
+                    $scope.listaProductos = data;
+                    $ionicLoading.hide();
                 },
                 function error(response) {
+                    $ionicLoading.hide();
                     $ionicPopup.alert({
                         title: 'Error',
                         template: response.message? response.message : 'Ocurrio un error'
                     });
                 }
-            )
+            );
+        }
+
+        $scope.$on('$ionicView.enter', function() {
+            $scope.listaComercios = listaComercios.getListaComercios();
+            if(comercioObject.isUndefined()) {
+                comercioObject.setComercio($scope.listaComercios[0]);
+            }
+            $scope.comercio  = comercioObject.getComercio();
+            $scope.updateListaProductos($scope.comercio);
         });
 
     })
@@ -113,7 +140,7 @@ angular.module('app.controllers', [])
                     template: 'Debes actualizar por lo menos una cantidad.'
                 });
             }
-        }
+        };
         //Si cambia el valor comercio, busca los productos.
         $scope.$watch('comercio', function(newValue, oldvalue) {
             if(newValue && newValue.id) {
@@ -121,8 +148,8 @@ angular.module('app.controllers', [])
                     template: 'Cargando...'
                 });
                 relevadorService.getProductosComercio(newValue.id)
-                    .then(function success(response){
-                        $scope.listaProductos = response.listaProductos;
+                    .then(function success(data){
+                        $scope.listaProductos = data;
                         $ionicLoading.hide();
                     },
                     function error(response) {
@@ -152,4 +179,5 @@ angular.module('app.controllers', [])
     .controller('AppController',
     function ($scope) {
 
-    })
+    });
+

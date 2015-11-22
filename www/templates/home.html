@@ -1,8 +1,18 @@
 <ion-view view-title="Home">
     <ion-content class="padding">
-        <div class="row" data-tap-disabled="true" ng-show="rutaInicia == true">
-            <div class="col-90 rmw-map-container">
-                <ui-gmap-google-map center='map.center' zoom='map.zoom'></ui-gmap-google-map>
+        <div ng-show="chartComercios.data.length > 0" clas="row well">
+            <div class="bar bar-header bar-energized">
+                <h1 class="title">Productos mas vendidos</h1>
+            </div>
+            <div class="col-100">
+                <canvas id="pie" class="chart chart-pie"
+                        chart-data="chartComercios.data" chart-labels="chartComercios.labels" style="margin-top:10%;">
+                </canvas>
+            </div>
+        </div>
+        <div class="text-center">
+            <div class="bar bar-header bar-assertive">
+                <h1 class="title">No dispones de productos</h1>
             </div>
         </div>
     </ion-content>

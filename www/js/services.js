@@ -81,26 +81,37 @@ angular.module('app.services', [])
 
     function ($q, $rootScope, $http) {
 
-        this.getRutasRelevador = function (idRelevador) {
-            var url = $rootScope;
+        this.getProductosMasVendidosPorComercio = function (idRelevador) {
+
             var defer = $q.defer();
-            $http.get(url)
+            var url = $rootScope.BACKEND_ENDPOINT + 'pedidos/masvendidos';
+
+            var request =  {
+                idRelevador: idRelevador
+            };
+
+            $http.post(url, request)
                 .then(
                 function success(response) {
-                    defer.resolve(response);
+                    defer.resolve(response.data)
                 },
-                function error(error, status) {
-                    defer.reject(error);
+                function error(response) {
+                    defer.reject(response.data);
                 }
             );
             return defer.promise;
-        }
+        };
 
-        this.getComercios = function () {
+        this.actualizarStock = function(idComercio, productos) {
+
             var defer = $q.defer();
-            var url = $rootScope.BACKEND_ENDPOINT + 'listaComercios';
+            var url = $rootScope.BACKEND_ENDPOINT + 'pedido/tomarpedido';
+            var request =  {
+                idComercio: idComercio,
+                productos: productos
+            };
 
-            $http.post(url)
+            $http.post(url, request)
                 .then(
                 function success(response) {
                     defer.resolve(response.data)
@@ -112,12 +123,28 @@ angular.module('app.services', [])
             return defer.promise;
         }
 
+        this.getComercios = function () {
+            var defer = $q.defer();
+            var url = $rootScope.BACKEND_ENDPOINT + 'comercios/index';
+
+            $http.get(url)
+                .then(
+                function success(response) {
+                    defer.resolve(response.data)
+                },
+                function error(response) {
+                    defer.reject(response.data);
+                }
+            );
+            return defer.promise;
+        };
+
         this.getProductosComercio = function (idComercio) {
             var defer = $q.defer();
-            var url = $rootScope.BACKEND_ENDPOINT + 'listaProductos';
+            var url = $rootScope.BACKEND_ENDPOINT + 'productos/index';
 
             var request = {idComercio: idComercio};
-            $http.post(url, request)
+            $http.get(url, request)
                 .then(
                 function success(response) {
                     defer.resolve(response.data)
@@ -132,7 +159,7 @@ angular.module('app.services', [])
         this.tomarPedidoProductos = function (request) {
 
             var defer = $q.defer();
-            var url = $rootScope.BACKEND_ENDPOINT + 'tomarPedido';
+            var url = $rootScope.BACKEND_ENDPOINT + 'pedidos/tomarpedido';
 
             $http.post(url, request)
                 .then(
@@ -164,6 +191,8 @@ angular.module('app.services', [])
             }
         }
     }])
+
+
 
     .factory('comercioObject', function () {
         var comercio = {};
