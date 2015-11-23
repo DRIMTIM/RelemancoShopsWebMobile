@@ -6,55 +6,48 @@ angular.module('app.services', [])
     .service('geoLocationService', function () {
         this.setCurrentLocation = function ($scope, $ionicLoading) {
             navigator.geolocation.getCurrentPosition(function (position) {
-                var center = {latitude: position.coords.latitude, longitude: position.coords.longitude};
-                $scope.map.center = center;
+                $scope.map.center = {latitude: position.coords.latitude, longitude: position.coords.longitude};
                 $ionicLoading.hide();
             }, function error() {
                 $scope.errors.push(error);
                 $ionicLoading.hide();
             });
-        }
+        };
 
-        this.createRoutes = function (markers, map) {
+        this.createRoutes = function (markers, Gmap) {
 
-            var directionsDisplay = new google.maps.DirectionsRenderer();
-            var directionsService = new google.maps.DirectionsService();
+                var directionsService = new google.maps.DirectionsService();
+                var map = Gmap.control.getGMap();
 
-            directionsDisplay.setMap(map.control.getGMap());
+                var start = new google.maps.LatLng(51.47482547819850,-0.37739553384529);
 
-            var origen = {lat: markers[0].latitude, lng: markers[0].longitude};
-            var destino = {lat: markers[markers.length - 1].latitude, lng: markers[markers.length - 1].longitude};
-            console.log(origen);
-            console.log(destino);
-            var wayPoints = createWayPoints(markers);
-
-            directionsService.route({
-                origin: origen,
-                destination: destino,
-                waypoints: wayPoints,
-                optimizeWaypoints: false,
-                travelMode: google.maps.TravelMode.DRIVING
-            },
-            function (response, status) {
-                if (status === google.maps.DirectionsStatus.OK) {
-                    directionsDisplay.setDirections(response);
-                    var route = response.routes[0];
-                    //var summaryPanel = document.getElementById('directions-panel');
-                    //summaryPanel.innerHTML = '';
-                    // For each route, display summary information.
-                    //for (var i = 0; i < route.legs.length; i++) {
-                    //    var routeSegment = i + 1;
-                    //    summaryPanel.innerHTML += '<b>Route Segment: ' + routeSegment +
-                    //        '</b><br>';
-                    //    summaryPanel.innerHTML += route.legs[i].start_address + ' to ';
-                    //    summaryPanel.innerHTML += route.legs[i].end_address + '<br>';
-                    //    summaryPanel.innerHTML += route.legs[i].distance.text + '<br><br>';
-                    //}
-                } else {
-                    window.alert('Failed due to ' + status);
+                function renderDirections(result) {
+                    var directionsRenderer = new google.maps.DirectionsRenderer({
+                        suppressMarkers: true
+                    });
+                    directionsRenderer.setMap(map);
+                    directionsRenderer.setDirections(result);
                 }
-            });
-        }
+
+                function requestDirections(start, end) {
+                    directionsService.route({
+                        origin: start,
+                        destination: end,
+                        travelMode: google.maps.DirectionsTravelMode.DRIVING,
+                        unitSystem: google.maps.UnitSystem.METRIC
+                    }, function(result) {
+                        renderDirections(result);
+                    });
+                }
+
+                for (var i = 0; i < markers.length; i++) {
+                    if (i < markers.length - 1) {
+                        var origen = {lat: markers[i].latitude, lng: markers[i].longitude};
+                        var destino = {lat: markers[i+1].latitude, lng: markers[i+1].longitude};
+                        requestDirections(origen, destino);
+                    }
+                }
+        };
 
         /**
          * Crea los puntos extra en el mapa empezando del segundo elemento
@@ -67,7 +60,7 @@ angular.module('app.services', [])
             if (markers.length > 2) {
                 for (var i = 1; i < markers.length - 1; i++) {
                     wayPoints.push({
-                        location: {lat: markers[i].latitude, lng: markers[i].longitude}
+                        location: {id: markers[i].id, lat: markers[i].latitude, lng: markers[i].longitude}
                     });
                 }
             }
@@ -121,11 +114,12 @@ angular.module('app.services', [])
                 }
             );
             return defer.promise;
-        }
+        };
 
         this.getComercios = function () {
+
             var defer = $q.defer();
-            var url = $rootScope.BACKEND_ENDPOINT + 'comercios/index';
+            var url = $rootScope.BACKEND_ENDPOINT_PROD + 'comercios/obtenercomercios';
 
             $http.get(url)
                 .then(
@@ -141,9 +135,9 @@ angular.module('app.services', [])
 
         this.getProductosComercio = function (idComercio) {
             var defer = $q.defer();
-            var url = $rootScope.BACKEND_ENDPOINT + 'productos/index';
+            var url = $rootScope.BACKEND_ENDPOINT_PROD + 'comercios/obtenerproductos';
 
-            var request = {idComercio: idComercio};
+            var request = {params: {id_comercio: idComercio}};
             $http.get(url, request)
                 .then(
                 function success(response) {
@@ -154,7 +148,7 @@ angular.module('app.services', [])
                 }
             );
             return defer.promise;
-        }
+        };
 
         this.tomarPedidoProductos = function (request) {
 
@@ -192,19 +186,17 @@ angular.module('app.services', [])
         }
     }])
 
-
-
     .factory('comercioObject', function () {
         var comercio = {};
         var setComercio = function (newComercio) {
             comercio = newComercio;
-        }
+        };
         var getComercio = function () {
             return comercio;
-        }
+        };
         var isUndefined = function () {
             return comercio.id == undefined || comercio.id == null;
-        }
+        };
         return {
             setComercio: setComercio,
             getComercio: getComercio,
@@ -216,10 +208,10 @@ angular.module('app.services', [])
         var listaComercios = []
         var setListaComercios = function (newListaComercios) {
             listaComercios = newListaComercios;
-        }
+        };
         var getListaComercios = function () {
             return listaComercios;
-        }
+        };
         var getComercio = function (id) {
             listaComercios.forEach(function (val) {
                 if (val.id == id) {
@@ -227,25 +219,36 @@ angular.module('app.services', [])
                 }
             });
             return null;
-        }
+        };
+        var findComercio = function(idComercio) {
+            for(var i = 0; i < listaComercios.length; i++) {
+                if(listaComercios[i].id === idComercio){
+                    return listaComercios[i];
+                }
+            }
+        };
         var getAllMarkers = function () {
             var result = [];
+            var i = 0;
             listaComercios.forEach(function (val) {
                 var marker = {
                     id: val.id,
                     title: val.nombre,
-                    latitude: val.lat,
-                    longitude: val.long
+                    latitude: Number(val.localizacion.latitud),
+                    longitude: Number(val.localizacion.longitud),
+                    showWindow: false,
                 };
                 result.push(marker);
+                i++;
             });
             return result;
-        }
+        };
         return {
             getListaComercios: getListaComercios,
             setListaComercios: setListaComercios,
             getComercio: getComercio,
-            getAllMarkers: getAllMarkers
+            getAllMarkers: getAllMarkers,
+            findComercio: findComercio
         }
-    })
+    });
 

@@ -1,4 +1,6 @@
-
+.rmw-boton-refresh:focus {
+    background-color: #69717d;
+}
 .chart {
     min-height: 20px;
     padding: 19px;

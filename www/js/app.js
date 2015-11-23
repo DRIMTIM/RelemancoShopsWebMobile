@@ -13,7 +13,6 @@ angular.module('app', ['ionic', 'app.controllers', 'app.services', 'uiGmapgoogle
             if (window.cordova && window.cordova.plugins.Keyboard) {
                 cordova.plugins.Keyboard.hideKeyboardAccessoryBar(true);
                 cordova.plugins.Keyboard.disableScroll(true);
-
             }
             if (window.StatusBar) {
                 // org.apache.cordova.statusbar required
@@ -48,7 +47,7 @@ angular.module('app', ['ionic', 'app.controllers', 'app.services', 'uiGmapgoogle
                 onEnter: function(listaComercios, relevadorService) {
                     relevadorService.getComercios()
                         .then(function success(data){
-                            listaComercios.setListaComercios(data)
+                            listaComercios.setListaComercios(data);
                         },
                         function error(response) {
                             listaComercios.setListaComercios([]);
@@ -92,5 +91,6 @@ angular.module('app', ['ionic', 'app.controllers', 'app.services', 'uiGmapgoogle
 
         //$rootScope.BACKEND_ENDPOINT = 'http://localhost/RelemancoShopsWeb/api/web/v1/';
         $rootScope.BACKEND_ENDPOINT = 'http://demo2039282.mockable.io/';
+        $rootScope.BACKEND_ENDPOINT_PROD = 'http://192.168.0.101/RelemancoShopsWeb/api/web/v1/';
         $rootScope.RELEVADOR = 'RELEVADOR';
     });

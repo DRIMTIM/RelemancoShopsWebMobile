@@ -1,7 +1,10 @@
 <ion-view view-title="Rutas">
     <ion-content class="padding">
         <div class="rmw-map-container-rutas" data-tap-disabled="true">
+            <button id="boton-refresh" type="button" class="button button-stable rmw-boton-refresh" ng-click="refreshRutas();" style="position: absolute; height: 36px; margin-top: 10px; right: 2%; z-index: 1;"><i class="ion-refresh"></i></button>
             <ui-gmap-google-map center='map.center' zoom='map.zoom' id="googleMap" control="map.control">
+                <ui-gmap-marker ng-repeat="m in comerciosMarkers" coords="m" icon="icon" fit='true' events="markersEvents" idkey="m.id">
+                </ui-gmap-marker>
             </ui-gmap-google-map>
         </div>
     </ion-content>

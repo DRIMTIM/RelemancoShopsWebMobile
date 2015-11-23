@@ -2,7 +2,7 @@
   <configuration default="false" name="Phonegap" type="PhoneGap" factoryName="PhoneGap/Cordova" singleton="false">
     <option name="myExecutable" value="/usr/local/bin/phonegap" />
     <option name="myWorkDir" value="$PROJECT_DIR$" />
-    <option name="myCommand" value="emulate" />
+    <option name="myCommand" value="run" />
     <option name="myPassParent" value="true" />
     <option name="myPlatform" value="browser" />
     <option name="myExtraArgs" value="" />
