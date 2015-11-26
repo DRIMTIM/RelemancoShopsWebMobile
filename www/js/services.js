@@ -70,6 +70,60 @@ angular.module('app.services', [])
         return this;
     })
 
+    .service('authService', function($localstorage, $rootScope, $q, $http){
+
+        this.doLogin = function(user) {
+
+            var defer = $q.defer();
+            var url = $rootScope.BACKEND_ENDPOINT_PROD + 'secure/login';
+
+            var data =  {
+                "login-form" : {
+                    login: user.userName,
+                    password: user.password
+                }
+            };
+
+            var request = {
+                method: 'POST',
+                url: url,
+                headers : {'Content-Type': 'application/x-www-form-urlencoded'},
+                data: data
+            };
+
+            $http(request)
+                .then(
+                function success(response) {
+                    if(angular.isObject(response.data && response.data.id)) {
+                        storeUser(response.data);
+                        defer.resolve(response.data)
+                    }
+                    else {
+                        defer.reject('El nombre de usuario o contraseña es incorrecto.')
+                    }
+                },
+                function error() {
+                    defer.reject('Ocurrio un error.');
+                }
+            );
+            return defer.promise;
+        };
+
+        this.isAuthenticated = function() {
+            var user = $localstorage.getObject($rootScope.USER_INDEX);
+            return angular.isObject(user) && user.id;
+        };
+
+        this.logout = function() {
+            $localstorage.remove($rootScope.USER_INDEX);
+        };
+
+        function storeUser(user) {
+            $localstorage.setObject($rootScope.USER_INDEX, user);
+        }
+
+    })
+
     .service('relevadorService',
 
     function ($q, $rootScope, $http) {
@@ -182,6 +236,9 @@ angular.module('app.services', [])
             },
             getObject: function (key) {
                 return JSON.parse($window.localStorage[key] || '{}');
+            },
+            remove: function(key) {
+                $window.localStorage[key] = null;
             }
         }
     }])

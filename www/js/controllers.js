@@ -1,9 +1,17 @@
 angular.module('app.controllers', [])
 
-    .controller('LoginController', function ($scope, $state, $localstorage, $rootScope) {
+    .controller('LoginController', function ($scope, $state, $localstorage, $rootScope, authService) {
+        $scope.user =  {};
+        $scope.errors = [];
         $scope.doLogin = function () {
-            $localstorage.set($rootScope.RELEVADOR, 1);
-            $state.go('app.home');
+            authService.doLogin($scope.user).then(
+                function success() {
+                    $state.go('app.home');
+                },
+                function error(error) {
+                    $scope.errors = [];
+                    $scope.errors.push(error);
+                });
         }
     })
 
@@ -189,7 +197,7 @@ angular.module('app.controllers', [])
         $scope.comercio = { };
         $scope.updateComercio = function(comercio) {
             $scope.comercio = comercio;
-        }
+        };
         $scope.tomarPedido = function() {
 
             var request =  {};
@@ -264,7 +272,10 @@ angular.module('app.controllers', [])
  * Controller global de todos los tabs.
  */
     .controller('AppController',
-    function ($scope) {
-
+    function ($scope, $state, authService) {
+        $scope.logout = function() {
+            authService.logout();
+            $state.go('login');
+        };
     });
 
