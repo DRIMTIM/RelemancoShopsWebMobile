@@ -1,7 +1,7 @@
 angular.module('app.controllers', [])
 
     .controller('LoginController', function ($scope, $state, $localstorage, $rootScope, authService) {
-        $scope.user =  {};
+        $scope.user =  { userName:'admin', password: 'admin1234'};
         $scope.errors = [];
         $scope.doLogin = function () {
             authService.doLogin($scope.user).then(
@@ -47,11 +47,19 @@ angular.module('app.controllers', [])
 
     .controller('RutasController',
 
-    function ($scope, $ionicPopup, $ionicLoading, geoLocationService, $localstorage, listaComercios, uiGmapIsReady, $ionicModal, comercioObject, $state, relevadorService) {
+    function ($rootScope, $scope, $ionicPopup, $ionicLoading, geoLocationService, $localstorage, listaComercios, uiGmapIsReady, $ionicModal, comercioObject, $state, relevadorService) {
         $scope.map = {center: {latitude: 45, longitude: -73}, zoom: 13, control: {}};
         $scope.comerciosMarkers = listaComercios.getAllMarkers();
-        $ionicLoading.show({
-            template: 'Cargando...'
+
+        $scope.$on($rootScope.BROADCAST_CAMBIO_CENTRO, function(event,args){
+           $scope.map.center = {latitude: args.comercio.localizacion.latitud , longitude: args.comercio.localizacion.longitud};
+        });
+
+        $scope.$on($rootScope.BROADCAST_IR_MI_LOCALIZACION, function(){
+            $ionicLoading.show({
+                template: 'Cargando...'
+            });
+            geoLocationService.setCurrentLocation($scope, $ionicLoading);
         });
 
         $ionicModal.fromTemplateUrl('templates/modals/menumarker.html', {
@@ -89,8 +97,6 @@ angular.module('app.controllers', [])
                 }
             )
         };
-
-        geoLocationService.setCurrentLocation($scope, $ionicLoading);
 
         uiGmapIsReady.promise(1).then(function(){
             geoLocationService.createRoutes($scope.comerciosMarkers, $scope.map);
@@ -272,10 +278,30 @@ angular.module('app.controllers', [])
  * Controller global de todos los tabs.
  */
     .controller('AppController',
-    function ($scope, $state, authService) {
+    function ($scope, $state, authService, $rootScope) {
         $scope.logout = function() {
             authService.logout();
             $state.go('login');
         };
+        $scope.listaComercios = [];
+
+        $scope.dispararCentroMapa = function(comercio) {
+            if(angular.isObject(comercio)){
+                $rootScope.$broadcast($rootScope.BROADCAST_CAMBIO_CENTRO, {comercio:comercio});
+                if($state.current !== 'app.mapa') {
+                    $state.go('app.mapa');
+                }
+            }
+        };
+
+        $scope.dispararIrMiLocalizacion = function() {
+            $rootScope.$broadcast($rootScope.BROADCAST_IR_MI_LOCALIZACION);
+            if($state.current !== 'app.mapa') {
+                $state.go('app.mapa');
+            }
+        };
+        $rootScope.$on($rootScope.BROADCAST_COMERCIOS, function(event, args){
+            $scope.listaComercios = args.listaComercios;
+        });
     });
 

@@ -134,9 +134,14 @@ angular.module('app', ['ionic', 'app.controllers', 'app.services', 'uiGmapgoogle
     })
     .run(function ($rootScope) {
 
+        //Broadcasts
+        $rootScope.BROADCAST_COMERCIOS = 'comercios-update';
+        $rootScope.BROADCAST_CAMBIO_CENTRO = 'comercios-centro';
+        $rootScope.BROADCAST_IR_MI_LOCALIZACION = 'mi-localizacion';
+        //Cookie Indexes
         $rootScope.USER_INDEX = 'RMW_LOGGED_USER';
         //$rootScope.BACKEND_ENDPOINT = 'http://localhost/RelemancoShopsWeb/api/web/v1/';
+        //URLS BAKCEND
         $rootScope.BACKEND_ENDPOINT = 'http://demo2039282.mockable.io/';
-        $rootScope.BACKEND_ENDPOINT_PROD = 'http://192.168.0.102/RelemancoShopsWeb/api/web/v1/';
-        $rootScope.RELEVADOR = 'RELEVADOR';
+        $rootScope.BACKEND_ENDPOINT_PROD = 'http://192.168.0.103/RelemancoShopsWeb/api/web/v1/';
     });

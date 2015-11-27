@@ -94,7 +94,7 @@ angular.module('app.services', [])
             $http(request)
                 .then(
                 function success(response) {
-                    if(angular.isObject(response.data && response.data.id)) {
+                    if(angular.isObject(response.data) && angular.isNumber(response.data.id)) {
                         storeUser(response.data);
                         defer.resolve(response.data)
                     }
@@ -261,10 +261,11 @@ angular.module('app.services', [])
         }
     })
 
-    .factory('listaComercios', function () {
+    .factory('listaComercios', function ($rootScope) {
         var listaComercios = []
         var setListaComercios = function (newListaComercios) {
             listaComercios = newListaComercios;
+            $rootScope.$broadcast($rootScope.BROADCAST_COMERCIOS, {listaComercios: listaComercios});
         };
         var getListaComercios = function () {
             return listaComercios;
@@ -294,6 +295,11 @@ angular.module('app.services', [])
                     latitude: Number(val.localizacion.latitud),
                     longitude: Number(val.localizacion.longitud),
                     showWindow: false,
+                    options: {
+                        icon: {
+                            url: 'img/icon.png',
+                        }
+                    }
                 };
                 result.push(marker);
                 i++;

@@ -1,16 +1,17 @@
-<ion-side-menus enable-menu-with-back-views="false">
+<ion-side-menus enable-menu-with-back-views="true">
     <ion-side-menu-content>
         <ion-nav-bar class="bar-dark">
-            <ion-nav-back-button>
-            </ion-nav-back-button>
             <ion-nav-buttons side="left">
                 <button class="button button-icon button-clear ion-navicon" menu-toggle="left">
+                </button>
+            </ion-nav-buttons>
+            <ion-nav-buttons side="right">
+                <button class="button button-icon button-clear ion-navicon" menu-toggle="right">
                 </button>
             </ion-nav-buttons>
         </ion-nav-bar>
         <ion-nav-view name="menuContent"></ion-nav-view>
     </ion-side-menu-content>
-
     <ion-side-menu side="left">
         <ion-header-bar class="bar-dark">
         </ion-header-bar>
@@ -37,6 +38,23 @@
                     <div>Salir</div>
                 </ion-item>
             </ion-list>
+        </ion-content>
+    </ion-side-menu>
+    <ion-side-menu side="right">
+        <ion-header-bar class="bar-dark">
+        </ion-header-bar>
+        <ion-content>
+            <div class="card">
+                <div class="item item-icon-left positive" ng-click="dispararIrMiLocalizacion()" menu-close>
+                    <i class="icon ion-arrow-right-a"></i>Ir a mi localizacion
+                </div>
+                <div class="item item-divider">
+                   <h2 class="text-center">Comercios disponibles</h2>
+                </div>
+                <div class="item item-text-wrap" ng-repeat="comercio in listaComercios" ng-click="dispararCentroMapa(comercio)" menu-close>
+                    {{comercio.nombre;}}
+                </div>
+            </div>
         </ion-content>
     </ion-side-menu>
 </ion-side-menus>
