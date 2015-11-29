@@ -16,10 +16,11 @@ angular.module('app.controllers', [])
     })
 
     .controller('HomeController',
-    function ($scope, $ionicLoading, relevadorService, $localstorage) {
+    function ($rootScope, $scope, $ionicLoading, relevadorService, $localstorage) {
 
-        //var idRelevador = $localstorage.get($rootScope.RELEVADOR);
-        var idRelevador = 1;
+        var user = $localstorage.getObject($rootScope.USER_INDEX);
+        $scope.idRelevador = user.id;
+
         $scope.selectedComercio = {};
         $scope.chartComercios = {
             data: [],
@@ -27,7 +28,7 @@ angular.module('app.controllers', [])
         };
 
         $scope.$on('$ionicView.enter', function () {
-            relevadorService.getProductosMasVendidosPorComercio(idRelevador).then(
+            relevadorService.getProductosMasVendidosPorComercio($scope.idRelevador).then(
                 function success(data) {
                     if (data.length > 0) {
                         $scope.selectedComercio = data[0];
@@ -126,7 +127,7 @@ angular.module('app.controllers', [])
         };
     })
 
-    .controller('StockController', function ($scope, comercioObject, relevadorService, $ionicPopup, listaComercios, $ionicLoading, $state) {
+    .controller('StockController', function ($scope, comercioObject, relevadorService, $ionicPopup, listaComercios, $ionicLoading, $state, $timeout) {
 
         $scope.comercio = { };
 
@@ -175,8 +176,11 @@ angular.module('app.controllers', [])
             });
             relevadorService.getProductosComercio(comercio.id)
                 .then(function success(data){
-                    $scope.listaProductos = data;
+                    $scope.listaProductos = [];
                     $ionicLoading.hide();
+                    $timeout(function() {
+                        $scope.listaProductos = data;
+                    }, 700);
                 },
                 function error(response) {
                     $ionicLoading.hide();
@@ -190,16 +194,17 @@ angular.module('app.controllers', [])
 
         $scope.$on('$ionicView.enter', function() {
             $scope.listaComercios = listaComercios.getListaComercios();
+            $scope.comercio  = comercioObject.getComercio();
             if(comercioObject.isUndefined()) {
                 comercioObject.setComercio($scope.listaComercios[0]);
+                $scope.comercio  = comercioObject.getComercio();
             }
-            $scope.comercio  = comercioObject.getComercio();
             $scope.updateListaProductos($scope.comercio);
         });
 
     })
 
-    .controller('PedidosController', function ($scope, comercioObject, relevadorService, $ionicPopup, $ionicLoading, listaComercios, $state) {
+    .controller('PedidosController', function ($scope, comercioObject, relevadorService, $ionicPopup, $ionicLoading, listaComercios, $state, authService, $timeout) {
         $scope.comercio = { };
         $scope.updateComercio = function(comercio) {
             $scope.comercio = comercio;
@@ -207,16 +212,22 @@ angular.module('app.controllers', [])
         $scope.tomarPedido = function() {
 
             var request =  {};
-            request.listaProductos = [];
-            request.idComercio = $scope.comercio.id;
+            var user = authService.getUser();
+
+            request.productos = [];
+            request.id_comercio = $scope.comercio.id;
+            request.id_relevador = user.id;
 
             $scope.listaProductos.forEach(function(value) {
                 if(value.cantidad && value.cantidad > 0) {
-                    request.listaProductos.push(value);
+                    request.productos.push({
+                        id: value.id,
+                        cantidad: value.cantidad
+                    });
                 }
             });
 
-            if(request.listaProductos.length > 0) {
+            if(request.productos.length > 0) {
                 relevadorService.tomarPedidoProductos(request)
                     .then(function success(response){
                         $ionicPopup.alert({
@@ -250,8 +261,12 @@ angular.module('app.controllers', [])
                 });
                 relevadorService.getProductosComercio(newValue.id)
                     .then(function success(data){
-                        $scope.listaProductos = data;
+                        $scope.listaProductos = [];
                         $ionicLoading.hide();
+                        $timeout(
+                            function(){
+                                $scope.listaProductos = data;
+                            }, 700);
                     },
                     function error(response) {
                         $ionicLoading.hide();

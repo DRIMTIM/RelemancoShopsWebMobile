@@ -62,6 +62,54 @@
     animation-delay:200ms;
 
     /* override to make sure it's not inherited from other styles */
-    -webkit-animation-duration:0;
-    animation-duration:0;
+    -webkit-animation-duration:0ms;
+    animation-duration:0ms;
+}
+
+.item.ng-leave {
+    -webkit-animation: fadeOutRight 1s;
+    animation: fadeOutRight 1s;
+}
+
+.item.ng-leave-stagger {
+    -webkit-animation-delay:200ms;
+    animation-delay:200ms;
+
+    /* override to make sure it's not inherited from other styles */
+    -webkit-animation-duration:0ms;
+    animation-duration:0ms;
+}
+
+/*Animations para stock*/
+
+.rmw-stock-container.ng-enter {
+    -webkit-animation: fadeInRight 1s;
+    animation: fadeInRight 1s;
+}
+
+.rmw-stock-container.ng-enter-stagger {
+    -webkit-animation-delay:200ms;
+    animation-delay:200ms;
+
+    /* override to make sure it's not inherited from other styles */
+    -webkit-animation-duration:0ms;
+    animation-duration:0ms;
+}
+
+.rmw-stock-container.ng-leave {
+    -webkit-animation: fadeOutRight 1s;
+    animation: fadeOutRight 1s;
+}
+
+.rmw-stock-container.ng-leave-stagger {
+    -webkit-animation-delay:200ms;
+    animation-delay:200ms;
+
+    /* override to make sure it's not inherited from other styles */
+    -webkit-animation-duration:0ms;
+    animation-duration:0ms;
+}
+
+.rmw-stock-container {
+
 }

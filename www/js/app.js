@@ -21,7 +21,11 @@ angular.module('app', ['ionic', 'app.controllers', 'app.services', 'uiGmapgoogle
         });
     })
 
-    .config(function ($stateProvider, $urlRouterProvider) {
+    .config(function ($stateProvider, $urlRouterProvider, $httpProvider) {
+
+        $httpProvider.defaults.headers.common['Content-Type'] = 'application/json; charset=utf-8';
+        $httpProvider.defaults.headers.post['Content-Type'] = 'application/json; charset=utf-8';
+
         $stateProvider
 
             .state('login', {
@@ -86,52 +90,6 @@ angular.module('app', ['ionic', 'app.controllers', 'app.services', 'uiGmapgoogle
 
         $urlRouterProvider.otherwise('/login');
     })
-    .config(function($httpProvider){
-        //Credito a -> http://victorblog.com/2012/12/20/make-angularjs-http-service-behave-like-jquery-ajax/asdasdgfdgohttprovider%20Httprovider
-        // Use x-www-form-urlencoded Content-Type
-        $httpProvider.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded;charset=utf-8';
-
-        /**
-         * The workhorse; converts an object to x-www-form-urlencoded serialization.
-         * @param {Object} obj
-         * @return {String}
-         */
-        var param = function(obj) {
-            var query = '', name, value, fullSubName, subName, subValue, innerObj, i;
-
-            for(name in obj) {
-                value = obj[name];
-
-                if(value instanceof Array) {
-                    for(i=0; i<value.length; ++i) {
-                        subValue = value[i];
-                        fullSubName = name + '[' + i + ']';
-                        innerObj = {};
-                        innerObj[fullSubName] = subValue;
-                        query += param(innerObj) + '&';
-                    }
-                }
-                else if(value instanceof Object) {
-                    for(subName in value) {
-                        subValue = value[subName];
-                        fullSubName = name + '[' + subName + ']';
-                        innerObj = {};
-                        innerObj[fullSubName] = subValue;
-                        query += param(innerObj) + '&';
-                    }
-                }
-                else if(value !== undefined && value !== null)
-                    query += encodeURIComponent(name) + '=' + encodeURIComponent(value) + '&';
-            }
-
-            return query.length ? query.substr(0, query.length - 1) : query;
-        };
-
-        // Override $http service's default transformRequest
-        $httpProvider.defaults.transformRequest = [function(data) {
-            return angular.isObject(data) && String(data) !== '[object File]' ? param(data) : data;
-        }];
-    })
     .run(function ($rootScope) {
 
         //Broadcasts
@@ -143,5 +101,5 @@ angular.module('app', ['ionic', 'app.controllers', 'app.services', 'uiGmapgoogle
         //$rootScope.BACKEND_ENDPOINT = 'http://localhost/RelemancoShopsWeb/api/web/v1/';
         //URLS BAKCEND
         $rootScope.BACKEND_ENDPOINT = 'http://demo2039282.mockable.io/';
-        $rootScope.BACKEND_ENDPOINT_PROD = 'http://192.168.0.103/RelemancoShopsWeb/api/web/v1/';
+        $rootScope.BACKEND_ENDPOINT_PROD = 'http://localhost/RelemancoShopsWeb/api/web/v1/';
     });

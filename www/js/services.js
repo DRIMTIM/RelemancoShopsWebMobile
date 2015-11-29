@@ -16,37 +16,37 @@ angular.module('app.services', [])
 
         this.createRoutes = function (markers, Gmap) {
 
-                var directionsService = new google.maps.DirectionsService();
-                var map = Gmap.control.getGMap();
+            var directionsService = new google.maps.DirectionsService();
+            var map = Gmap.control.getGMap();
 
-                var start = new google.maps.LatLng(51.47482547819850,-0.37739553384529);
+            var start = new google.maps.LatLng(51.47482547819850, -0.37739553384529);
 
-                function renderDirections(result) {
-                    var directionsRenderer = new google.maps.DirectionsRenderer({
-                        suppressMarkers: true
-                    });
-                    directionsRenderer.setMap(map);
-                    directionsRenderer.setDirections(result);
+            function renderDirections(result) {
+                var directionsRenderer = new google.maps.DirectionsRenderer({
+                    suppressMarkers: true
+                });
+                directionsRenderer.setMap(map);
+                directionsRenderer.setDirections(result);
+            }
+
+            function requestDirections(start, end) {
+                directionsService.route({
+                    origin: start,
+                    destination: end,
+                    travelMode: google.maps.DirectionsTravelMode.DRIVING,
+                    unitSystem: google.maps.UnitSystem.METRIC
+                }, function (result) {
+                    renderDirections(result);
+                });
+            }
+
+            for (var i = 0; i < markers.length; i++) {
+                if (i < markers.length - 1) {
+                    var origen = {lat: markers[i].latitude, lng: markers[i].longitude};
+                    var destino = {lat: markers[i + 1].latitude, lng: markers[i + 1].longitude};
+                    requestDirections(origen, destino);
                 }
-
-                function requestDirections(start, end) {
-                    directionsService.route({
-                        origin: start,
-                        destination: end,
-                        travelMode: google.maps.DirectionsTravelMode.DRIVING,
-                        unitSystem: google.maps.UnitSystem.METRIC
-                    }, function(result) {
-                        renderDirections(result);
-                    });
-                }
-
-                for (var i = 0; i < markers.length; i++) {
-                    if (i < markers.length - 1) {
-                        var origen = {lat: markers[i].latitude, lng: markers[i].longitude};
-                        var destino = {lat: markers[i+1].latitude, lng: markers[i+1].longitude};
-                        requestDirections(origen, destino);
-                    }
-                }
+            }
         };
 
         /**
@@ -70,15 +70,15 @@ angular.module('app.services', [])
         return this;
     })
 
-    .service('authService', function($localstorage, $rootScope, $q, $http){
+    .service('authService', function ($localstorage, $rootScope, $q, $http, xFormConverter) {
 
-        this.doLogin = function(user) {
+        this.doLogin = function (user) {
 
             var defer = $q.defer();
             var url = $rootScope.BACKEND_ENDPOINT_PROD + 'secure/login';
 
-            var data =  {
-                "login-form" : {
+            var data = {
+                "login-form": {
                     login: user.userName,
                     password: user.password
                 }
@@ -87,14 +87,15 @@ angular.module('app.services', [])
             var request = {
                 method: 'POST',
                 url: url,
-                headers : {'Content-Type': 'application/x-www-form-urlencoded'},
-                data: data
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                data: data,
+                transformRequest: xFormConverter.transformRequest
             };
 
             $http(request)
                 .then(
                 function success(response) {
-                    if(angular.isObject(response.data) && angular.isNumber(response.data.id)) {
+                    if (angular.isObject(response.data) && angular.isNumber(response.data.id)) {
                         storeUser(response.data);
                         defer.resolve(response.data)
                     }
@@ -109,13 +110,17 @@ angular.module('app.services', [])
             return defer.promise;
         };
 
-        this.isAuthenticated = function() {
+        this.isAuthenticated = function () {
             var user = $localstorage.getObject($rootScope.USER_INDEX);
             return angular.isObject(user) && user.id;
         };
 
-        this.logout = function() {
+        this.logout = function () {
             $localstorage.remove($rootScope.USER_INDEX);
+        };
+
+        this.getUser = function () {
+            return $localstorage.getObject($rootScope.USER_INDEX);
         };
 
         function storeUser(user) {
@@ -126,14 +131,14 @@ angular.module('app.services', [])
 
     .service('relevadorService',
 
-    function ($q, $rootScope, $http) {
+    function ($q, $rootScope, $http, xFormConverter) {
 
         this.getProductosMasVendidosPorComercio = function (idRelevador) {
 
             var defer = $q.defer();
             var url = $rootScope.BACKEND_ENDPOINT + 'pedidos/masvendidos';
 
-            var request =  {
+            var request = {
                 idRelevador: idRelevador
             };
 
@@ -149,11 +154,11 @@ angular.module('app.services', [])
             return defer.promise;
         };
 
-        this.actualizarStock = function(idComercio, productos) {
+        this.actualizarStock = function (idComercio, productos) {
 
             var defer = $q.defer();
             var url = $rootScope.BACKEND_ENDPOINT + 'pedido/tomarpedido';
-            var request =  {
+            var request = {
                 idComercio: idComercio,
                 productos: productos
             };
@@ -204,12 +209,33 @@ angular.module('app.services', [])
             return defer.promise;
         };
 
-        this.tomarPedidoProductos = function (request) {
+        this.tomarPedidoProductos = function (data) {
 
             var defer = $q.defer();
-            var url = $rootScope.BACKEND_ENDPOINT + 'pedidos/tomarpedido';
+            var url = $rootScope.BACKEND_ENDPOINT_PROD + 'pedidos/confirmarpedido';
 
-            $http.post(url, request)
+
+
+            //var request = {
+            //    method: 'POST',
+            //    url: url,
+            //    headers: {
+            //        'Accept': 'application/json',
+            //        'Content-Type' : 'application/json'
+            //    },
+            //    data: data
+            //};
+            //Fuck you php
+            var json = angular.toJson(data);
+
+            var request = {
+                method: 'POST',
+                url: url,
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                data: json,
+                transformRequest: xFormConverter.transformRequest
+            };
+            $http(request)
                 .then(
                 function success(response) {
                     defer.resolve(response.data)
@@ -237,7 +263,7 @@ angular.module('app.services', [])
             getObject: function (key) {
                 return JSON.parse($window.localStorage[key] || '{}');
             },
-            remove: function(key) {
+            remove: function (key) {
                 $window.localStorage[key] = null;
             }
         }
@@ -278,9 +304,9 @@ angular.module('app.services', [])
             });
             return null;
         };
-        var findComercio = function(idComercio) {
-            for(var i = 0; i < listaComercios.length; i++) {
-                if(listaComercios[i].id === idComercio){
+        var findComercio = function (idComercio) {
+            for (var i = 0; i < listaComercios.length; i++) {
+                if (listaComercios[i].id === idComercio) {
                     return listaComercios[i];
                 }
             }
@@ -313,5 +339,53 @@ angular.module('app.services', [])
             getAllMarkers: getAllMarkers,
             findComercio: findComercio
         }
+    })
+
+    .service('xFormConverter', function () {
+        //Credito a -> http://victorblog.com/2012/12/20/make-angularjs-http-service-behave-like-jquery-ajax/asdasdgfdgohttprovider%20Httprovider
+        /**
+         * The workhorse; converts an object to x-www-form-urlencoded serialization.
+         * @param {Object} obj
+         * @return {String}
+         */
+        var param = function (obj) {
+            var query = '', name, value, fullSubName, subName, subValue, innerObj, i;
+
+            for (name in obj) {
+                value = obj[name];
+
+                if (value instanceof Array) {
+                    for (i = 0; i < value.length; ++i) {
+                        subValue = value[i];
+                        fullSubName = name + '[' + i + ']';
+                        innerObj = {};
+                        innerObj[fullSubName] = subValue;
+                        query += param(innerObj) + '&';
+                    }
+                }
+                else if (value instanceof Object) {
+                    for (subName in value) {
+                        subValue = value[subName];
+                        fullSubName = name + '[' + subName + ']';
+                        innerObj = {};
+                        innerObj[fullSubName] = subValue;
+                        query += param(innerObj) + '&';
+                    }
+                }
+                else if (value !== undefined && value !== null)
+                    query += encodeURIComponent(name) + '=' + encodeURIComponent(value) + '&';
+            }
+
+            return query.length ? query.substr(0, query.length - 1) : query;
+        };
+
+        // Override $http service's default transformRequest
+        return {
+            transformRequest: transformRequest = [function (data) {
+                return angular.isObject(data) && String(data) !== '[object File]' ? param(data) : data;
+            }]
+        }
     });
+
+
 
