@@ -110,9 +110,9 @@ angular.module('app.controllers', [])
             }
         }
 
-        //$interval(function(){
-        //    geoLocationService.setMarkerUserLocation($scope.comerciosMarkers);
-        //}, 10000);
+        $interval(function(){
+            geoLocationService.setMarkerUserLocation($scope.comerciosMarkers);
+        }, 10000);
 
         $scope.refreshRutas = function() {
             $ionicLoading.show({
