@@ -101,5 +101,5 @@ angular.module('app', ['ionic', 'app.controllers', 'app.services', 'uiGmapgoogle
         //$rootScope.BACKEND_ENDPOINT = 'http://localhost/RelemancoShopsWeb/api/web/v1/';
         //URLS BAKCEND
         $rootScope.BACKEND_ENDPOINT = 'http://demo2039282.mockable.io/';
-        $rootScope.BACKEND_ENDPOINT_PROD = 'http://localhost/RelemancoShopsWeb/api/web/v1/';
+        $rootScope.BACKEND_ENDPOINT_PROD = 'http://192.168.0.102/RelemancoShopsWeb/api/web/v1/';
     });

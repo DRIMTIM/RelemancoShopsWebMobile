@@ -14,12 +14,39 @@ angular.module('app.services', [])
             });
         };
 
+        this.setMarkerUserLocation = function (markers) {
+            navigator.geolocation.getCurrentPosition(function (position) {
+                var location = 'USER_LOCATION';
+                var index = null;
+                //Quito el elemento
+                for(var i = 0; i< markers.length; i++) {
+                    if(markers[i].id === location) {
+                        index = i;
+                        break;
+                    }
+                }
+                if(index != null) {
+                    markers.splice(index, 1);
+                }
+                markers.push({
+                    id: location,
+                    latitude: position.coords.latitude,
+                    longitude: position.coords.longitude,
+                    showWindow: false,
+                    options: {
+                        icon: {
+                            url: 'img/man.png',
+                        }
+                    }
+                });
+            });
+        };
+
+
         this.createRoutes = function (markers, Gmap) {
 
             var directionsService = new google.maps.DirectionsService();
             var map = Gmap.control.getGMap();
-
-            var start = new google.maps.LatLng(51.47482547819850, -0.37739553384529);
 
             function renderDirections(result) {
                 var directionsRenderer = new google.maps.DirectionsRenderer({

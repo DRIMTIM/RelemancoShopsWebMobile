@@ -23,6 +23,7 @@ angular.module('app.controllers', [])
     function ($rootScope, $scope, $ionicLoading, relevadorService, $localstorage) {
 
         var user = $localstorage.getObject($rootScope.USER_INDEX);
+
         $scope.idRelevador = user.id;
 
         $scope.selectedComercio = {};
@@ -57,7 +58,7 @@ angular.module('app.controllers', [])
     .controller('RutasController',
 
     function ($rootScope, $scope, $ionicPopup, $ionicLoading, geoLocationService, $localstorage, listaComercios,
-              uiGmapIsReady, $ionicModal, comercioObject, $state, relevadorService, authService)
+              uiGmapIsReady, $ionicModal, comercioObject, $state, relevadorService, authService, $interval)
     {
 
         $scope.map = {center: {latitude: 45, longitude: -73}, zoom: 13, control: {}};
@@ -88,6 +89,7 @@ angular.module('app.controllers', [])
         };
 
         $scope.comerciosMarkers = listaComercios.getAllMarkers();
+
         var usuario = authService.getUser();
         if(angular.isObject(usuario.localizacion)) {
             if(usuario.localizacion.latitud && usuario.localizacion.longitud) {
@@ -107,6 +109,10 @@ angular.module('app.controllers', [])
                 };
             }
         }
+
+        //$interval(function(){
+        //    geoLocationService.setMarkerUserLocation($scope.comerciosMarkers);
+        //}, 10000);
 
         $scope.refreshRutas = function() {
             $ionicLoading.show({
@@ -131,10 +137,13 @@ angular.module('app.controllers', [])
         };
         $scope.$on('$ionicView.enter', function() {
             uiGmapIsReady.promise(1).then(function(){
+                var comercio = comercioObject.getComercio();
+                if(angular.isDefined(comercio) && comercio.id) {
+                    $scope.map.center = {latitude: comercio.localizacion.latitud, longitude: comercio.localizacion.longitud};
+                }
                 geoLocationService.createRoutes($scope.comerciosMarkers, $scope.map);
             });
         });
-
 
         $scope.markersEvents = {
             click: function (gMarker, eventName, model) {
