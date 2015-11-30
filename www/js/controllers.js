@@ -1,6 +1,6 @@
 angular.module('app.controllers', [])
 
-    .controller('LoginController', function ($scope, $state, $localstorage, $rootScope, authService) {
+    .controller('LoginController', function ($scope, $state, $localstorage, $rootScope, authService, $ionicHistory) {
         $scope.user =  { userName:'admin', password: 'admin1234'};
         $scope.errors = [];
         $scope.doLogin = function () {
@@ -12,7 +12,11 @@ angular.module('app.controllers', [])
                     $scope.errors = [];
                     $scope.errors.push(error);
                 });
-        }
+        };
+        $scope.$on('$ionicView.enter', function () {
+            $ionicHistory.clearCache();
+            $ionicHistory.clearHistory();
+        });
     })
 
     .controller('HomeController',
@@ -28,6 +32,7 @@ angular.module('app.controllers', [])
         };
 
         $scope.$on('$ionicView.enter', function () {
+            $scope.tieneProductos = true;
             relevadorService.getProductosMasVendidosPorComercio($scope.idRelevador).then(
                 function success(data) {
                     if (data.length > 0) {
@@ -41,6 +46,9 @@ angular.module('app.controllers', [])
                             });
                         }
                     }
+                    else {
+                        $scope.tieneProductos = false;
+                    }
                 }
             );
         });
@@ -48,9 +56,11 @@ angular.module('app.controllers', [])
 
     .controller('RutasController',
 
-    function ($rootScope, $scope, $ionicPopup, $ionicLoading, geoLocationService, $localstorage, listaComercios, uiGmapIsReady, $ionicModal, comercioObject, $state, relevadorService) {
+    function ($rootScope, $scope, $ionicPopup, $ionicLoading, geoLocationService, $localstorage, listaComercios,
+              uiGmapIsReady, $ionicModal, comercioObject, $state, relevadorService, authService)
+    {
+
         $scope.map = {center: {latitude: 45, longitude: -73}, zoom: 13, control: {}};
-        $scope.comerciosMarkers = listaComercios.getAllMarkers();
 
         $scope.$on($rootScope.BROADCAST_CAMBIO_CENTRO, function(event,args){
            $scope.map.center = {latitude: args.comercio.localizacion.latitud , longitude: args.comercio.localizacion.longitud};
@@ -77,6 +87,27 @@ angular.module('app.controllers', [])
             $scope.modal.hide();
         };
 
+        $scope.comerciosMarkers = listaComercios.getAllMarkers();
+        var usuario = authService.getUser();
+        if(angular.isObject(usuario.localizacion)) {
+            if(usuario.localizacion.latitud && usuario.localizacion.longitud) {
+                $scope.homeMarker = {
+                    id: usuario.localizacion.id,
+                    title: 'Mi casa',
+                    latitude: Number(usuario.localizacion.latitud),
+                    longitude: Number(usuario.localizacion.longitud),
+                    showWindow: false,
+                    options: {
+                        icon: {
+                            url: 'img/home.png',
+                            label: 'Mi casita',
+                            clickable: true
+                        }
+                    }
+                };
+            }
+        }
+
         $scope.refreshRutas = function() {
             $ionicLoading.show({
                 template: 'Refrescando rutas...'
@@ -98,10 +129,12 @@ angular.module('app.controllers', [])
                 }
             )
         };
-
-        uiGmapIsReady.promise(1).then(function(){
-            geoLocationService.createRoutes($scope.comerciosMarkers, $scope.map);
+        $scope.$on('$ionicView.enter', function() {
+            uiGmapIsReady.promise(1).then(function(){
+                geoLocationService.createRoutes($scope.comerciosMarkers, $scope.map);
+            });
         });
+
 
         $scope.markersEvents = {
             click: function (gMarker, eventName, model) {
@@ -127,24 +160,27 @@ angular.module('app.controllers', [])
         };
     })
 
-    .controller('StockController', function ($scope, comercioObject, relevadorService, $ionicPopup, listaComercios, $ionicLoading, $state, $timeout) {
+    .controller('StockController', function ($scope, comercioObject, relevadorService, $ionicPopup, listaComercios, $ionicLoading, $state, $timeout, authService) {
 
         $scope.comercio = { };
 
         $scope.actualizarStock = function() {
 
-            var request =  {};
-            request.listaProductos = [];
-            request.idComercio = $scope.comercio.id;
+            var productos = [];
+            var userId = authService.getUser().id;
+            var idComercio = $scope.comercio.id;
 
             $scope.listaProductos.forEach(function(value) {
-                if(value.stock) {
-                    request.listaProductos.push(value);
+                if(value.cantidad) {
+                    productos.push({
+                        id: value.id,
+                        cantidad: value.cantidad
+                    });
                 }
             });
-
-            if(request.listaProductos.length > 0) {
-                relevadorService.actualizarStock(request)
+            //dRelevador, idComercio, productos
+            if(productos.length > 0) {
+                relevadorService.actualizarStock(userId, idComercio, productos)
                     .then(function success(){
                         $ionicPopup.alert({
                             title: 'Operacion exitosa',
@@ -152,7 +188,6 @@ angular.module('app.controllers', [])
                         }).then(function(){
                             $state.go('app.mapa');
                         });
-
                     },
                     function error(response) {
                         $ionicPopup.alert({
@@ -171,6 +206,9 @@ angular.module('app.controllers', [])
         };
 
         $scope.updateListaProductos = function(comercio) {
+
+            comercioObject.setComercio(comercio);
+
             $ionicLoading.show({
                 template: 'Cargando...'
             });
@@ -195,11 +233,13 @@ angular.module('app.controllers', [])
         $scope.$on('$ionicView.enter', function() {
             $scope.listaComercios = listaComercios.getListaComercios();
             $scope.comercio  = comercioObject.getComercio();
-            if(comercioObject.isUndefined()) {
+            if(comercioObject.isUndefined() && $scope.listaComercios.length > 0) {
                 comercioObject.setComercio($scope.listaComercios[0]);
-                $scope.comercio  = comercioObject.getComercio();
             }
-            $scope.updateListaProductos($scope.comercio);
+            if($scope.listaComercios.length > 0) {
+                $scope.comercio  = comercioObject.getComercio();
+                $scope.updateListaProductos($scope.comercio);
+            }
         });
 
     })
@@ -208,6 +248,7 @@ angular.module('app.controllers', [])
         $scope.comercio = { };
         $scope.updateComercio = function(comercio) {
             $scope.comercio = comercio;
+            comercioObject.setComercio(comercio);
         };
         $scope.tomarPedido = function() {
 
@@ -281,11 +322,13 @@ angular.module('app.controllers', [])
         }, true);
         $scope.$on('$ionicView.enter', function() {
             $scope.listaComercios = listaComercios.getListaComercios();
-            $scope.listaProductos = [];
-            if(comercioObject.isUndefined()) {
+            if(comercioObject.isUndefined() && $scope.listaComercios.length > 0) {
+                $scope.listaProductos = [];
                 comercioObject.setComercio($scope.listaComercios[0]);
             }
-            $scope.comercio = comercioObject.getComercio();
+            if($scope.listaComercios.length > 0) {
+                $scope.comercio = comercioObject.getComercio();
+            }
         });
 
     })

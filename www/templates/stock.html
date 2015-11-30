@@ -1,6 +1,9 @@
 <ion-view view-title="Actualizar Stock">
     <ion-content>
-        <form ng-submit="actualizarStock()">
+        <div class="bar bar-header bar-assertive text-center" ng-if="listaComercios.length === 0">
+            <div class="title"><i class="ion-alert-circled"></i>&nbsp;No tienes rutas asignadas.</div>
+        </div>
+        <form ng-submit="actualizarStock()" ng-show="listaComercios.length > 0">
             <div class="list card">
                 <div class="item item-divider">
                     <a class="text-right">Comercio</a>
@@ -17,14 +20,14 @@
                         <h2 class="text-left positive">{{producto.nombre}}</h2>
                     </div>
                     <div class="item item-thumbnail-left">
-                        <img src="img/404Prod.jpg"/>
+                        <img ng-src="{{producto.imagen}}"/>
                         <div class="range rmw-range">
                             <i class="icon ion-ios-minus-outline"></i>
-                            <input type="range" ng-model="producto.stock" name="volume" min="0" max="{{producto.stockMaximo}}" value="{{producto.stock}}">
+                            <input type="range" ng-init="producto.cantidad=producto.stock" ng-model="producto.cantidad" name="volume" min="0" max="{{producto.stock}}">
                             <i class="icon ion-ios-plus-outline"></i>
                             <div class="rmw-input-stock">
                                 <button class="button button-stable">
-                                    {{producto.stock}}
+                                    {{producto.cantidad}}
                                 </button>
                             </div>
                         </div>

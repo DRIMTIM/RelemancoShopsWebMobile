@@ -1,11 +1,21 @@
 <ion-view view-title="Rutas">
     <ion-content class="padding">
+        <div class="bar bar-header bar-assertive text-center" ng-if="listaComercios.length === 0" style="margin-bottom: 5em;">
+            <div class="title">
+                <i class="ion-alert-circled"></i>&nbsp;No tienes rutas asignadas.
+            </div>
+        </div>
         <div class="rmw-map-container-rutas" data-tap-disabled="true">
             <button id="boton-refresh" type="button" class="button button-stable rmw-boton-refresh" ng-click="refreshRutas();" style="position: absolute; height: 36px; margin-top: 10px; right: 2%; z-index: 1;"><i class="ion-refresh"></i></button>
             <ui-gmap-google-map center='map.center' zoom='map.zoom' id="googleMap" control="map.control">
                 <ui-gmap-marker ng-repeat="m in comerciosMarkers" coords="m" options="m.options" fit='true' events="markersEvents" idkey="m.id">
                 </ui-gmap-marker>
+
+                <ui-gmap-marker ng-if="homeMarker !== undefined" coords="homeMarker" options="homeMarker.options" fit='true' idkey="homeMarker.id">
+                </ui-gmap-marker>
+
             </ui-gmap-google-map>
+
         </div>
     </ion-content>
 </ion-view>

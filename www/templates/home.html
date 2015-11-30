@@ -3,14 +3,14 @@
         <div class="bar bar-header bar-energized">
             <h1 class="title">Productos mas vendidos</h1>
         </div>
-        <div class="col-100">
+        <div class="col-100" ng-if="chartComercios.data.length > 0">
             <canvas id="pie" class="chart chart-pie"
                     chart-data="chartComercios.data" chart-labels="chartComercios.labels" style="margin-top:10%;">
             </canvas>
         </div>
-        <div ng-if="chartComercios.data.length === 0" class="text-center" >
+        <div ng-if="tieneProductos === false" class="text-center">
             <div class="bar bar-header bar-assertive">
-                <h1 class="title">No dispones de productos</h1>
+                <h1 class="title"><i class="ion-alert-circled"></i>&nbsp;No dispones de productos</h1>
             </div>
         </div>
     </ion-content>

@@ -95,12 +95,12 @@ angular.module('app.services', [])
             $http(request)
                 .then(
                 function success(response) {
-                    if (angular.isObject(response.data) && angular.isNumber(response.data.id)) {
+                    if(response.data == false) {
+                        defer.reject('El nombre de usuario o contraseña es incorrecto.')
+                    }
+                    else if (response.data.length > 0 && angular.isObject(response.data[0]) && angular.isNumber(response.data[0].id)) {
                         storeUser(response.data);
                         defer.resolve(response.data)
-                    }
-                    else {
-                        defer.reject('El nombre de usuario o contraseña es incorrecto.')
                     }
                 },
                 function error() {
@@ -124,14 +124,18 @@ angular.module('app.services', [])
         };
 
         function storeUser(user) {
-            $localstorage.setObject($rootScope.USER_INDEX, user);
+            var usuario = user[0];
+            if(user.length > 1) {
+                usuario.localizacion = user[1];
+            }
+            $localstorage.setObject($rootScope.USER_INDEX, usuario);
         }
 
     })
 
     .service('relevadorService',
 
-    function ($q, $rootScope, $http, xFormConverter) {
+    function ($q, $rootScope, $http, xFormConverter, authService) {
 
         this.getProductosMasVendidosPorComercio = function (idRelevador) {
 
@@ -154,16 +158,28 @@ angular.module('app.services', [])
             return defer.promise;
         };
 
-        this.actualizarStock = function (idComercio, productos) {
+        this.actualizarStock = function (idRelevador, idComercio, productos) {
 
             var defer = $q.defer();
-            var url = $rootScope.BACKEND_ENDPOINT + 'pedido/tomarpedido';
-            var request = {
-                idComercio: idComercio,
+            var url = $rootScope.BACKEND_ENDPOINT_PROD + 'pedidos/relevar-stock-comercio';
+
+            var data = {
+                id_comercio: idComercio,
+                id_relevador: idRelevador,
                 productos: productos
             };
 
-            $http.post(url, request)
+            var json = angular.toJson(data);
+
+            var request = {
+                method: 'POST',
+                url: url,
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                data: json,
+                transformRequest: xFormConverter.transformRequest
+            };
+
+            $http(request)
                 .then(
                 function success(response) {
                     defer.resolve(response.data)
@@ -178,12 +194,21 @@ angular.module('app.services', [])
         this.getComercios = function () {
 
             var defer = $q.defer();
-            var url = $rootScope.BACKEND_ENDPOINT_PROD + 'comercios/obtenercomercios';
+            var url = $rootScope.BACKEND_ENDPOINT_PROD + 'rutas/obtenerruta';
+            //var url = $rootScope.BACKEND_ENDPOINT_PROD + 'comercios/obtenercomercios';
 
-            $http.get(url)
+            var user = authService.getUser();
+
+            $http.get(url, {params: {id_relevador : user.id}})
                 .then(
                 function success(response) {
-                    defer.resolve(response.data)
+                    var json = angular.fromJson(response.data);
+                    if(angular.isArray(json)) {
+                        defer.resolve(angular.fromJson(response.data));
+                    }
+                    else {
+                        defer.reject(response.data);
+                    }
                 },
                 function error(response) {
                     defer.reject(response.data);
@@ -200,7 +225,18 @@ angular.module('app.services', [])
             $http.get(url, request)
                 .then(
                 function success(response) {
-                    defer.resolve(response.data)
+                    if(angular.isArray(response.data)){
+                        var result = [];
+                        response.data.forEach(function(value){
+                            var producto = value.producto;
+                            producto.stock = value.cantidad;
+                            result.push(producto);
+                        });
+                        defer.resolve(result)
+                    }
+                    else {
+                        defer.reject(response.data);
+                    }
                 },
                 function error(response) {
                     defer.reject(response.data);
@@ -214,18 +250,6 @@ angular.module('app.services', [])
             var defer = $q.defer();
             var url = $rootScope.BACKEND_ENDPOINT_PROD + 'pedidos/confirmarpedido';
 
-
-
-            //var request = {
-            //    method: 'POST',
-            //    url: url,
-            //    headers: {
-            //        'Accept': 'application/json',
-            //        'Content-Type' : 'application/json'
-            //    },
-            //    data: data
-            //};
-            //Fuck you php
             var json = angular.toJson(data);
 
             var request = {
@@ -278,7 +302,7 @@ angular.module('app.services', [])
             return comercio;
         };
         var isUndefined = function () {
-            return comercio.id == undefined || comercio.id == null;
+            return comercio == undefined || comercio.id == undefined || comercio.id == null;
         };
         return {
             setComercio: setComercio,
@@ -288,7 +312,7 @@ angular.module('app.services', [])
     })
 
     .factory('listaComercios', function ($rootScope) {
-        var listaComercios = []
+        var listaComercios = [];
         var setListaComercios = function (newListaComercios) {
             listaComercios = newListaComercios;
             $rootScope.$broadcast($rootScope.BROADCAST_COMERCIOS, {listaComercios: listaComercios});
@@ -386,6 +410,3 @@ angular.module('app.services', [])
             }]
         }
     });
-
-
-
