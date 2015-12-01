@@ -86,6 +86,15 @@ angular.module('app', ['ionic', 'app.controllers', 'app.services', 'uiGmapgoogle
                         controller: 'StockController'
                     }
                 }
+            })
+            .state('app.historico', {
+               url: '/historico',
+                views: {
+                    'menuContent': {
+                        templateUrl: 'templates/historico.html',
+                        controller: 'HistoricoController'
+                    }
+                }
             });
 
         $urlRouterProvider.otherwise('/login');

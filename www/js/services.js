@@ -3,7 +3,7 @@ angular.module('app.services', [])
 /**
  * Requiere GoogleMaps.js
  */
-    .service('geoLocationService', function () {
+    .service('geoLocationService', function ($q) {
         this.setCurrentLocation = function ($scope, $ionicLoading) {
             navigator.geolocation.getCurrentPosition(function (position) {
                 $scope.map.center = {latitude: position.coords.latitude, longitude: position.coords.longitude};
@@ -14,21 +14,23 @@ angular.module('app.services', [])
             });
         };
 
-        this.setMarkerUserLocation = function (markers) {
+        this.clearRoutes = function(Gmap) {
+            if(angular.isArray(Gmap._directions)){
+                var directionsRenderer = Gmap._directions;
+                if(directionsRenderer.length > 0) {
+                    directionsRenderer.forEach(function(val){
+                       val.setMap(null);
+                    });
+                    Gmap._directions = [];
+                }
+            }
+        };
+
+        this.setMarkerUserLocation = function () {
+            var defer = $q.defer();
             navigator.geolocation.getCurrentPosition(function (position) {
-                var location = 'USER_LOCATION';
-                var index = null;
-                //Quito el elemento
-                for(var i = 0; i< markers.length; i++) {
-                    if(markers[i].id === location) {
-                        index = i;
-                        break;
-                    }
-                }
-                if(index != null) {
-                    markers.splice(index, 1);
-                }
-                markers.push({
+                var location = 'USER-LOCATION';
+                var userMarker = {
                     id: location,
                     latitude: position.coords.latitude,
                     longitude: position.coords.longitude,
@@ -38,8 +40,10 @@ angular.module('app.services', [])
                             url: 'img/man.png',
                         }
                     }
-                });
+                };
+                defer.resolve(userMarker);
             });
+            return defer.promise;
         };
 
 
@@ -47,13 +51,14 @@ angular.module('app.services', [])
 
             var directionsService = new google.maps.DirectionsService();
             var map = Gmap.control.getGMap();
-
+            Gmap._directions = [];
             function renderDirections(result) {
                 var directionsRenderer = new google.maps.DirectionsRenderer({
                     suppressMarkers: true
                 });
                 directionsRenderer.setMap(map);
                 directionsRenderer.setDirections(result);
+                Gmap._directions.push(directionsRenderer);
             }
 
             function requestDirections(start, end) {
@@ -296,7 +301,24 @@ angular.module('app.services', [])
                 }
             );
             return defer.promise;
-        }
+        };
+
+        this.obtenerHistoricoRutas = function(idRelevador) {
+
+            var defer = $q.defer();
+            var url = $rootScope.BACKEND_ENDPOINT_PROD + 'rutas/obtenerhistoricorutas';
+
+            $http.get(url, {params: {id_relevador: idRelevador}})
+                .then(
+                function success(response) {
+                    defer.resolve(angular.fromJson(response.data));
+                },
+                function error(response) {
+                    defer.reject(response.data);
+                }
+            );
+            return defer.promise;
+        };
 
     })
 
@@ -374,7 +396,7 @@ angular.module('app.services', [])
                     showWindow: false,
                     options: {
                         icon: {
-                            url: 'img/icon.png',
+                            url: 'img/icon.png'
                         }
                     }
                 };

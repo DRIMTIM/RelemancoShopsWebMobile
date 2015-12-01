@@ -1,0 +1,26 @@
+<ion-view view-title="Historico de rutas">
+    <ion-content>
+        <div class="rmw-map-container-historico col-100" data-tap-disabled="true">
+            <ui-gmap-google-map center='map.center' zoom='map.zoom' id="googleMapHistorico" control="map.control" >
+                <ui-gmap-marker ng-repeat="m in markers" coords="m" options="m.options" events="markersEvents"
+                                idkey="m.id">
+                </ui-gmap-marker>
+            </ui-gmap-google-map>
+        </div>
+
+        <div class="col-100">
+            <div class="card">
+                <div class="item item-divider">
+                    <h2 class="text-center positive">Rutas</h2>
+                </div>
+                <ion-scroll zooming="false" style="height:45vh;">
+                    <div ng-repeat="ruta in rutas" class="item" ng-click="dibujarRuta(ruta)">
+                        <p>{{ruta.fecha_asignada | date:"dd/MM/yyyy"}}</p>
+                        <span>{{ruta.estado.nombre}}</span>
+                    </div>
+                </ion-scroll>
+            </div>
+        </div>
+
+    </ion-content>
+</ion-view>

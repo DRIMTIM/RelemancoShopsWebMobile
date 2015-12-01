@@ -61,7 +61,7 @@ angular.module('app.controllers', [])
               uiGmapIsReady, $ionicModal, comercioObject, $state, relevadorService, authService, $interval)
     {
 
-        $scope.map = {center: {latitude: 45, longitude: -73}, zoom: 13, control: {}};
+        $scope.map = {center: {latitude: -34.917606, longitude: -56.161835}, zoom: 13, control: {}};
 
         $scope.$on($rootScope.BROADCAST_CAMBIO_CENTRO, function(event,args){
            $scope.map.center = {latitude: args.comercio.localizacion.latitud , longitude: args.comercio.localizacion.longitud};
@@ -110,9 +110,12 @@ angular.module('app.controllers', [])
             }
         }
 
-        $interval(function(){
-            geoLocationService.setMarkerUserLocation($scope.comerciosMarkers);
-        }, 10000);
+        //$interval(function($scope){
+        //    geoLocationService.setMarkerUserLocation($scope)
+        //        .then(function(val){
+        //            $scope.userMarker = val;
+        //        });
+        //}, 10000);
 
         $scope.refreshRutas = function() {
             $ionicLoading.show({
@@ -122,6 +125,7 @@ angular.module('app.controllers', [])
                 .then(function success(data){
                     listaComercios.setListaComercios(data);
                     $scope.comerciosMarkers = listaComercios.getAllMarkers();
+                    geoLocationService.clearRoutes($scope.map);
                     geoLocationService.createRoutes($scope.comerciosMarkers, $scope.map);
                     $ionicLoading.hide();
                 },
@@ -141,6 +145,7 @@ angular.module('app.controllers', [])
                 if(angular.isDefined(comercio) && comercio.id) {
                     $scope.map.center = {latitude: comercio.localizacion.latitud, longitude: comercio.localizacion.longitud};
                 }
+                geoLocationService.clearRoutes($scope.map);
                 geoLocationService.createRoutes($scope.comerciosMarkers, $scope.map);
             });
         });
@@ -370,5 +375,46 @@ angular.module('app.controllers', [])
         $rootScope.$on($rootScope.BROADCAST_COMERCIOS, function(event, args){
             $scope.listaComercios = args.listaComercios;
         });
+    })
+
+    .controller('HistoricoController', function($scope, relevadorService, authService, geoLocationService) {
+        $scope.map = {center: {latitude: -34.921337, longitude: -56.161663}, zoom: 16, control: {}, options: {disableDefaultUI:true}};
+        $scope.markers = [];
+        $scope.rutas = [];
+
+        $scope.dibujarRuta = function(ruta){
+            geoLocationService.clearRoutes($scope.map);
+            $scope.markers = [];
+            ruta.comercios.forEach(function(val){
+                $scope.markers.push({
+                    id: val.id,
+                    title: val.nombre,
+                    latitude: Number(val.localizacion.latitud),
+                    longitude: Number(val.localizacion.longitud),
+                    options: {
+                        icon: {
+                            url: 'img/icon.png'
+                        }
+                    }
+                });
+            });
+            geoLocationService.createRoutes($scope.markers, $scope.map);
+        };
+
+        var user = authService.getUser();
+        $scope.$on('$ionicView.enter', function () {
+            relevadorService.obtenerHistoricoRutas(user.id).then(
+                function success(data){
+                    $scope.rutas = data;
+                    $scope.$broadcast('scroll.infiniteScrollComplete');
+                },
+                function error(){
+                    $ionicPopup.alert({
+                        title: 'Error',
+                        template: 'Ocurrio un error al obtener las rutas.'
+                    });
+                });
+        });
+
     });
 

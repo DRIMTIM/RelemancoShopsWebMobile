@@ -52,6 +52,11 @@
     position: relative;
 }
 
+.rmw-map-container-historico {
+    height: 45vh;
+    position: relative;
+}
+
 .item.ng-enter {
     -webkit-animation: fadeInRight 1s;
     animation: fadeInRight 1s;
