@@ -26,9 +26,7 @@
                             <input type="range" ng-init="producto.cantidad=producto.stock" ng-model="producto.cantidad" name="volume" min="0" value="{{producto.stock}}" max="{{producto.stock}}">
                             <i class="icon ion-ios-plus-outline"></i>
                             <div class="rmw-input-stock">
-                                <button type="button" class="button button-stable">
-                                    {{producto.cantidad}}
-                                </button>
+                                <input type="number" class="rmw-input-stock" ng-model="producto.cantidad" ng-value="producto.cantidad">
                             </div>
                         </div>
                     </div>

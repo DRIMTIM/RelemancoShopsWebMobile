@@ -13,7 +13,10 @@
 }
 
 .rmw-input-stock {
-    margin-left: 4%;
+    margin-left: 2%;
+    padding-left: 4px;
+    background: none !important;
+    background-color: ghostwhite !important;
 }
 
 .rmw-range {
