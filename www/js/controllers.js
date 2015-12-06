@@ -67,6 +67,10 @@ angular.module('app.controllers', [])
            $scope.map.center = {latitude: args.comercio.localizacion.latitud , longitude: args.comercio.localizacion.longitud};
         });
 
+        $scope.$on('REFRESH_RUTAS', function(event, args) {
+            $scope.refreshRutas();
+        });
+
         $scope.$on($rootScope.BROADCAST_IR_MI_LOCALIZACION, function(){
             $ionicLoading.show({
                 template: 'Cargando...'
@@ -416,5 +420,87 @@ angular.module('app.controllers', [])
                 });
         });
 
+    })
+    .controller('TerminarRutaController', function($rootScope, $scope, relevadorService, authService, listaComercios, $state, $ionicPopup) {
+        $scope.estados = [];
+        $scope.errors = [];
+        $scope.checkEvent = function(estado) {
+            $scope.estados.forEach(function(val){
+                if(estado.id !== val.id) {
+                    val.isChecked = false;
+                }
+            });
+        };
+
+        $scope.actualizarEstado = function() {
+
+            if($scope.comercios.length == 0)
+                return;
+
+            var estadoActualizar = null;
+            for(var i = 0; i < $scope.estados.length ; i++) {
+                var current = $scope.estados[i];
+                if(current.isChecked === true) {
+                    estadoActualizar = current;
+                    break;
+                }
+            }
+
+            if(estadoActualizar == null) {
+                $scope.errors = [];
+                $scope.errors.push('Debes seleccionar un estado.')
+            }
+            else {
+                var ruta = listaComercios.getRuta();
+                ruta.estado = {
+                    id: estadoActualizar.id,
+                    nombre: estadoActualizar.nombre
+                };
+                relevadorService.relevarRuta(ruta).then(
+                    function success(){
+                        $ionicPopup.alert({
+                            title: 'Operacion exitosa',
+                            template: 'Se ha actualizo la ruta correctamente.'
+                        }).then(function(){
+                            $state.go('app.mapa').then(function(){
+                                $rootScope.$broadcast('REFRESH_RUTAS');
+                            });
+                        });
+                    },
+                    function error(error){
+                        $scope.errors = [];
+                        $scope.errors.push(error);
+                    }
+                )
+            }
+
+        };
+
+        $scope.$on('$ionicView.enter', function () {
+            $scope.comercios = listaComercios.getListaComercios();
+            if($scope.comercios.length == 0){
+                $scope.tieneComercios = false;
+                $scope.errors = [];
+                $scope.errors.push('No tienes rutas asignadas');
+            }
+            else {
+                $scope.tieneComercios = true;
+            }
+            if($scope.estados.length === 0) {
+                relevadorService.getEstadosRuta().then(
+                    function success(data){
+                        if(data.length > 0){
+                            $scope.estados = data;
+                            $scope.estados[2].isChecked = true;
+                        }
+                    },
+                    function error(error){
+                        $scope.errors = [];
+                        $scope.errors.push(error);
+                    }
+                );
+            }
+        });
     });
+
 

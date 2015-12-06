@@ -169,6 +169,42 @@ angular.module('app.services', [])
 
     function ($q, $rootScope, $http, xFormConverter, authService) {
 
+
+        this.relevarRuta = function(ruta) {
+
+            var defer = $q.defer();
+            var url = $rootScope.BACKEND_ENDPOINT_PROD + 'rutas/relevarruta';
+
+            $http.get(url, {params: { ruta: ruta }})
+                .then(
+                function success() {
+                   defer.resolve();
+                },
+                function error(response) {
+                    defer.reject(response.data);
+                }
+            );
+            return defer.promise;
+
+        };
+
+        this.getEstadosRuta = function() {
+
+            var defer = $q.defer();
+            var url = $rootScope.BACKEND_ENDPOINT_PROD + 'rutas/obtenerestadosdisponibles';
+
+            $http.get(url, {cache: true})
+                .then(
+                function success(response) {
+                    defer.resolve(angular.fromJson(response.data));
+                },
+                function error(response) {
+                    defer.reject(response.data);
+                }
+            );
+            return defer.promise;
+        };
+
         this.getProductosMasVendidosPorComercio = function (idRelevador) {
 
             var defer = $q.defer();
@@ -235,7 +271,7 @@ angular.module('app.services', [])
                 .then(
                 function success(response) {
                     var json = angular.fromJson(response.data);
-                    if(angular.isArray(json)) {
+                    if(angular.isObject(json)) {
                         defer.resolve(angular.fromJson(response.data));
                     }
                     else {
@@ -261,7 +297,7 @@ angular.module('app.services', [])
                         var result = [];
                         response.data.forEach(function(value){
                             var producto = value.producto;
-                            producto.stock = value.cantidad;
+                            producto.stock = Number(value.cantidad);
                             result.push(producto);
                         });
                         defer.resolve(result)
@@ -362,12 +398,17 @@ angular.module('app.services', [])
 
     .factory('listaComercios', function ($rootScope) {
         var listaComercios = [];
-        var setListaComercios = function (newListaComercios) {
-            listaComercios = newListaComercios;
+        var ruta = [];
+        var setListaComercios = function (data) {
+            listaComercios = data.comercios;
+            ruta = data.ruta;
             $rootScope.$broadcast($rootScope.BROADCAST_COMERCIOS, {listaComercios: listaComercios});
         };
         var getListaComercios = function () {
             return listaComercios;
+        };
+        var getRuta = function() {
+            return ruta;
         };
         var getComercio = function (id) {
             listaComercios.forEach(function (val) {
@@ -409,13 +450,14 @@ angular.module('app.services', [])
             getListaComercios: getListaComercios,
             setListaComercios: setListaComercios,
             getComercio: getComercio,
+            getRuta: getRuta,
             getAllMarkers: getAllMarkers,
             findComercio: findComercio
         }
     })
 
     .service('xFormConverter', function () {
-        //Credito a -> http://victorblog.com/2012/12/20/make-angularjs-http-service-behave-like-jquery-ajax/asdasdgfdgohttprovider%20Httprovider
+        //Credito a -> http://victorblog.com/2012/12/20/make-angularjs-http-service-behave-like-jquery-ajax/
         /**
          * The workhorse; converts an object to x-www-form-urlencoded serialization.
          * @param {Object} obj

@@ -23,10 +23,10 @@
                         <img ng-src="{{producto.imagen}}"/>
                         <div class="range rmw-range">
                             <i class="icon ion-ios-minus-outline"></i>
-                            <input type="range" ng-init="producto.cantidad=producto.stock" ng-model="producto.cantidad" name="volume" min="0" value="{{producto.stock}}" max="{{producto.stock}}">
+                            <input type="range" range-parser ng-init="producto.cantidad = producto.stock" value="{{producto.cantidad}}" ng-model="producto.cantidad" min="0" max="{{producto.stock}}">
                             <i class="icon ion-ios-plus-outline"></i>
                             <div class="rmw-input-stock">
-                                <input type="number" class="rmw-input-stock" ng-model="producto.cantidad" ng-value="producto.cantidad">
+                                <input type="number" class="rmw-input-stock" ng-model="producto.cantidad" ng-value="producto.cantidad" max="{{producto.stock}}">
                             </div>
                         </div>
                     </div>

@@ -1,0 +1,15 @@
+<ion-view view-title="Terminar Ruta del día">
+    <ion-content>
+        <div class="bar bar-header bar-assertive text-center" ng-repeat="error in errors">
+            <div class="title">
+                <i class="ion-alert-circled"></i>&nbsp;{{error}}
+            </div>
+        </div>
+        <ion-checkbox ng-repeat="estado in estados" ng-model="estado.isChecked" ng-change="checkEvent(estado)" ng-if="tieneComercios" ng-cloak>
+            {{estado.nombre}}
+        </ion-checkbox>
+        <div class="item text-center">
+            <button type="submit" class="button button-positive" ng-click="actualizarEstado()" ng-if="tieneComercios">Confirmar</button>
+        </div>
+    </ion-content>
+</ion-view>

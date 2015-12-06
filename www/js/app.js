@@ -95,6 +95,15 @@ angular.module('app', ['ionic', 'app.controllers', 'app.services', 'uiGmapgoogle
                         controller: 'HistoricoController'
                     }
                 }
+            })
+            .state('app.terminar_ruta', {
+                url: '/terminar_ruta',
+                views: {
+                    'menuContent': {
+                        templateUrl: 'templates/terminar_ruta.html',
+                        controller: 'TerminarRutaController'
+                    }
+                }
             });
 
         $urlRouterProvider.otherwise('/login');
@@ -110,5 +119,19 @@ angular.module('app', ['ionic', 'app.controllers', 'app.services', 'uiGmapgoogle
         //$rootScope.BACKEND_ENDPOINT = 'http://localhost/RelemancoShopsWeb/api/web/v1/';
         //URLS BAKCEND
         $rootScope.BACKEND_ENDPOINT = 'http://demo2039282.mockable.io/';
-        $rootScope.BACKEND_ENDPOINT_PROD = 'http://192.168.0.102/RelemancoShopsWeb/api/web/v1/';
+        $rootScope.BACKEND_ENDPOINT_PROD = 'http://192.168.0.103/RelemancoShopsWeb/api/web/v1/';
+    })
+    .directive('rangeParser', function() {
+        return {
+            require: '?ngModel',
+            link: function(scope, element, attr, ctrl) {
+                if (!ctrl) return;
+                ctrl.$parsers.push(function(value) {
+                    var val = Number(value);
+                    if (val !== val) val = undefined;
+                    return val;
+                });
+            }
+        };
     });
+
